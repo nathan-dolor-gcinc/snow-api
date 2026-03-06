@@ -3728,10 +3728,11 @@ class Api(object):
         except Exception as e:
             print(f"Error during API call: {e}")
             raise
-
+    """
     @require_auth
     def get_table_record(self, **kwargs) -> Response:
-        """
+    """
+    """
         Get a specific record from the specified table.
 
         :param table: The name of the table.
@@ -3743,7 +3744,8 @@ class Api(object):
         :rtype: Response
 
         :raises MissingParameterError: If table or table_record_sys_id is not provided.
-        """
+    """
+    """
         try:
             table_model = TableModel(**kwargs)
             if table_model.table is None or table_model.table_record_sys_id is None:
@@ -3759,6 +3761,105 @@ class Api(object):
             result_data = json_response.get("result", json_response)
             parsed_data = Table.model_validate(result_data)
             return Response(response=response, result=parsed_data)
+        except ValidationError as ve:
+            print(f"Invalid parameters or response data: {ve.errors()}")
+            raise
+        except Exception as e:
+            print(f"Error during API call: {e}")
+            raise
+    """
+    @require_auth
+    def get_table_records(self, **kwargs) -> Response:
+        """
+    Retrieve one or more records from a specified ServiceNow table.
+
+    If `table_record_sys_id` is provided, returns a single record.
+    Otherwise, uses query parameters to return multiple records from the table.
+
+    :param table: Name of the table to query.
+    :type table: str
+    :param table_record_sys_id: The sys_id of a specific record to retrieve.
+    :type table_record_sys_id: str
+    :param name_value_pairs: Optional dictionary of name-value pairs for filtering records.
+    :type name_value_pairs: str
+    :param sysparm_query: Encoded query string for filtering records.
+    :type sysparm_query: str
+    :param sysparm_fields: Comma-separated list of field names to include in the response.
+    :type sysparm_fields: str
+    :param sysparm_limit: Maximum number of records to return.
+    :type sysparm_limit: int
+    :param sysparm_offset: Number of records to skip before starting retrieval.
+    :type sysparm_offset: int
+    :param sysparm_display_value: Display values for reference fields ('True', 'False', or 'all').
+    :type sysparm_display_value: str
+    :param sysparm_exclude_reference_link: Exclude reference links in the response.
+    :type sysparm_exclude_reference_link: bool
+    :param sysparm_no_count: Do not include the total number of records in the response.
+    :type sysparm_no_count: bool
+    :param sysparm_query_category: Category to which the query belongs.
+    :type sysparm_query_category: str
+    :param sysparm_query_no_domain: Exclude records based on domain separation.
+    :type sysparm_query_no_domain: bool
+    :param sysparm_suppress_pagination_header: Suppress pagination headers in the response.
+    :type sysparm_suppress_pagination_header: bool
+    :param sysparm_view: Display style for the results ('desktop', 'mobile', or 'both').
+    :type sysparm_view: str
+    :param api_parameters: Optional dictionary of additional API parameters to include.
+    :type api_parameters: dict
+
+    :return: Response containing a parsed Pydantic model (single record) or a list of models (multiple records).
+    :rtype: Response
+
+    :raises MissingParameterError: If the `table` parameter is not provided.
+    :raises ValidationError: If provided input parameters are invalid.
+    :raises Exception: For other errors occurring during the API call.
+    
+    :note: This method dynamically builds API query parameters from the provided kwargs.
+           If `table_record_sys_id` is specified, a single record is returned.
+           Otherwise, a list of records matching the query parameters is returned.
+    """
+
+        try:
+            table_model = TableModel(**kwargs)
+
+            if not table_model.table:
+                raise MissingParameterError("Table name is required")
+
+            # Determine URL
+            if table_model.table_record_sys_id:
+                # Single record
+                url = f"{self.url}/now/table/{table_model.table}/{table_model.table_record_sys_id}"
+            else:
+                # Multiple records
+                url = f"{self.url}/now/table/{table_model.table}"
+
+            # Build query parameters dynamically (exclude table/table_record_sys_id)
+            params = {
+                k: v
+                for k, v in table_model.model_dump().items()
+                if k not in ("table", "table_record_sys_id", "data") and v is not None
+            }
+
+            response = self._session.get(
+                url=url,
+                params=params if params else None,
+                headers=self.headers,
+                verify=self.verify,
+                proxies=self.proxies,
+            )
+
+            response.raise_for_status()
+            json_response = response.json()
+            result_data = json_response.get("result", json_response)
+
+            # Always return a list for multiple-record queries
+            if table_model.table_record_sys_id:
+                parsed_data = Table.model_validate(result_data)
+            else:
+                parsed_data = [Table.model_validate(item) for item in result_data]
+
+            return Response(response=response, result=parsed_data)
+
         except ValidationError as ve:
             print(f"Invalid parameters or response data: {ve.errors()}")
             raise

@@ -3,6 +3,7 @@ MANIFEST.in
 README.md
 pyproject.toml
 requirements.txt
+setup.cfg
 scripts/validate_a2a_agent.py
 scripts/validate_agent.py
 servicenow_api/__init__.py

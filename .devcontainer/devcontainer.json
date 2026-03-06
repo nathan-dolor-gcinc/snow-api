@@ -1,0 +1,10 @@
+
+{
+  "name": "snow-api",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    }
+  },
+  "postCreateCommand": "python -m venv .venv && . .venv/bin/activate && pip install -U pip setuptools wheel && pip install . && pip install 'fastmcp<3' 'py-key-value-aio' 'beartype>=0.23'"
+}

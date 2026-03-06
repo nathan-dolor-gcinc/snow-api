@@ -2028,6 +2028,44 @@ def register_tools(mcp: FastMCP):
     @mcp.tool(
         tags={"table_api"},
     )
+    @mcp.tool(tags={"tables"})
+    async def get_table_records(
+        table: str = Field(description="The table name"),
+        table_record_sys_id: Optional[str] = Field(
+            default=None, description="Specific record sys_id to fetch"
+        ),
+        sysparm_query: Optional[str] = Field(default=None, description="Encoded query string"),
+        sysparm_limit: Optional[int] = Field(default=5, description="Maximum number of records"),
+        sysparm_offset: Optional[int] = Field(default=None, description="Records to skip"),
+        sysparm_fields: Optional[str] = Field(default=None, description="Comma-separated list of fields"),
+        sysparm_display_value: Optional[str] = Field(default=None, description="Display values for reference fields"),
+        sysparm_exclude_reference_link: Optional[bool] = Field(default=None, description="Exclude reference links"),
+        sysparm_no_count: Optional[bool] = Field(default=None, description="Do not include count"),
+        sysparm_query_category: Optional[str] = Field(default=None, description="Query category"),
+        sysparm_query_no_domain: Optional[bool] = Field(default=None, description="Exclude domain records"),
+        sysparm_suppress_pagination_header: Optional[bool] = Field(default=None, description="Suppress pagination header"),
+        sysparm_view: Optional[str] = Field(default=None, description="Display style ('desktop', 'mobile', 'both')"),
+        name_value_pairs: Optional[str] = Field(default=None, description="Name-value pairs for filtering"),
+        _client=Depends(get_client),
+    ) -> Response:
+        return _client.get_table_records(
+            table=table,
+            table_record_sys_id=table_record_sys_id,
+            sysparm_query=sysparm_query,
+            sysparm_limit=sysparm_limit,
+            sysparm_offset=sysparm_offset,
+            sysparm_fields=sysparm_fields,
+            sysparm_display_value=sysparm_display_value,
+            sysparm_exclude_reference_link=sysparm_exclude_reference_link,
+            sysparm_no_count=sysparm_no_count,
+            sysparm_query_category=sysparm_query_category,
+            sysparm_query_no_domain=sysparm_query_no_domain,
+            sysparm_suppress_pagination_header=sysparm_suppress_pagination_header,
+            sysparm_view=sysparm_view,
+            name_value_pairs=name_value_pairs,
+        )
+
+    """
     async def get_table_record(
         table: str = Field(description="The name of the table"),
         table_record_sys_id: str = Field(
@@ -2035,14 +2073,15 @@ def register_tools(mcp: FastMCP):
         ),
         _client=Depends(get_client),
     ) -> Response:
-        """
+    """
+    """
         Get a specific record from the specified table on a ServiceNow instance.
         """
-
+    """
         return _client.get_table_record(
             table=table, table_record_sys_id=table_record_sys_id
         )
-
+    """
     @mcp.tool(
         tags={"table_api"},
     )

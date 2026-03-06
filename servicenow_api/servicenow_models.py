@@ -933,7 +933,8 @@ class KnowledgeManagementModel(BaseModel):
             self.api_parameters["sysparm_update_view"] = self.sysparm_update_view
 
 
-class TableModel(BaseModel):
+class 
+(BaseModel):
     """
     Pydantic model representing a Table.
 
